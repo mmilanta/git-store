@@ -1,3 +1,4 @@
 src/recipe-data/
 venv/
 .env
+.mypy_cache/
