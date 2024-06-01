@@ -6,11 +6,12 @@ import git_commands
 
 app = FastAPI()
 
-data_folder = "recipe-data"
+data_folder = os.environ["LOCAL_REPO_FOLDER"]
 
 
 @app.get("/{key}")
 async def get_data(key: str) -> bytes:
+    check_valid_path(key)
     with open(os.path.join(data_folder, key), "r", encoding="utf-8") as f:
         data = f.read()
     return data.encode("utf-8")
@@ -44,5 +45,5 @@ async def list_data() -> list[str]:
 
 
 def check_valid_path(key: str):
-    if not os.path.isfile(key):
+    if not os.path.isfile(os.path.join(data_folder, key)):
         raise HTTPException(status_code=404, detail="Key not found")
