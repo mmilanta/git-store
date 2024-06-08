@@ -1,15 +1,16 @@
 import os
-
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Path
+from typing import Annotated
 
 import git_commands
 
 app = FastAPI()
 
 data_folder = os.environ["LOCAL_REPO_FOLDER"]
+KeyType = Annotated[str, Path(title="key", pattern="^[^/\0]+$")]
 
 
-@app.get("/{key}")
+@app.get("/{key}", status_code=200)
 async def get_data(key: str) -> bytes:
     check_valid_path(key)
     with open(os.path.join(data_folder, key), "r", encoding="utf-8") as f:
@@ -17,8 +18,8 @@ async def get_data(key: str) -> bytes:
     return data.encode("utf-8")
 
 
-@app.put("/{key}")
-async def set_data(key: str, request: Request) -> None:
+@app.put("/{key}", status_code=200)
+async def set_data(key: KeyType, request: Request) -> None:
     path = os.path.join(data_folder, key)
     is_new_file = not os.path.isfile(path)
     with open(path, "w+") as f:
@@ -26,12 +27,12 @@ async def set_data(key: str, request: Request) -> None:
         f.write(bystr.decode("utf-8"))
     git_commands.commit_and_push(
         file_path=key,
-        commit_message="new" if is_new_file else "edit" + f": {key}",
+        commit_message=("new" if is_new_file else "edit") + f": {key}",
     )
 
 
-@app.delete("/{key}")
-async def delete_data(key: str) -> None:
+@app.delete("/{key}", status_code=200)
+async def delete_data(key: KeyType) -> None:
     check_valid_path(key)
     os.remove(os.path.join(data_folder, key))
     git_commands.commit_and_push(
@@ -39,11 +40,11 @@ async def delete_data(key: str) -> None:
     )
 
 
-@app.get("/")
+@app.get("/", status_code=200)
 async def list_data() -> list[str]:
     return [entry for entry in os.listdir(data_folder)]
 
 
-def check_valid_path(key: str):
+def check_valid_path(key: KeyType):
     if not os.path.isfile(os.path.join(data_folder, key)):
         raise HTTPException(status_code=404, detail="Key not found")

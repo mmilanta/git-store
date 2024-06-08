@@ -20,7 +20,7 @@ def commit_and_push(file_path: str | None, commit_message: str):
     if file_path is not None:
         repo.index.add([file_path])
     else:
-        repo.index.add(all=True)
+        repo.git.add(u=True)
     repo.index.commit(commit_message)
     origin = repo.remote(name='origin')
     origin.push()
