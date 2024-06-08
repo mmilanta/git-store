@@ -4,3 +4,4 @@ pydantic
 uvicorn
 mypy
 pre-commit
+pytest
