@@ -1,5 +1,5 @@
 import os
-from fastapi import FastAPI, HTTPException, Request, Path
+from fastapi import FastAPI, HTTPException, Request, Path, Response
 from typing import Annotated
 import asyncio
 import logging
@@ -20,7 +20,7 @@ PUSH_DUE: bool = False
 async def push_loop():
     global PUSH_DUE
     while True:
-        await asyncio.sleep(os.environ["PUSH_EVERY_N_SECONDS"])
+        await asyncio.sleep(int(os.environ["PUSH_EVERY_N_SECONDS"]))
         if PUSH_DUE:
             git_commands.push()
             PUSH_DUE = False
@@ -32,21 +32,22 @@ asyncio.create_task(push_loop())
 app = FastAPI()
 
 
-@app.get("/{key}", status_code=200)
+@app.get("/{key}")
 async def get_data(key: KeyType) -> bytes:
     check_valid_path(key)
-    with open(os.path.join(data_folder, key), "r", encoding="utf-8") as f:
+    with open(os.path.join(data_folder, key), "rb") as f:
         data = f.read()
-    return data.encode("utf-8")
+    return Response(content=data, status_code=200)
 
 
 @app.put("/{key}", status_code=200)
 async def set_data(key: KeyType, request: Request) -> None:
     path = os.path.join(data_folder, key)
     is_new_file = not os.path.isfile(path)
-    with open(path, "w+") as f:
+    with open(path, "wb+") as f:
         bystr = await request.body()
-        f.write(bystr.decode("utf-8"))
+        logger.info(f"bystr: {bystr}")
+        f.write(bystr)
 
     git_commands.commit(
         file_path=key,
