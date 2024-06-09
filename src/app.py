@@ -3,6 +3,7 @@ from fastapi import FastAPI, HTTPException, Request, Path, Response
 from typing import Annotated
 import asyncio
 import logging
+import aiofiles
 
 import git_commands
 
@@ -35,8 +36,8 @@ app = FastAPI()
 @app.get("/{key}")
 async def get_data(key: KeyType) -> bytes:
     check_valid_path(key)
-    with open(os.path.join(data_folder, key), "rb") as f:
-        data = f.read()
+    async with aiofiles.open(os.path.join(data_folder, key), "rb") as f:
+        data = await f.read()
     return Response(content=data, status_code=200)
 
 
@@ -44,10 +45,9 @@ async def get_data(key: KeyType) -> bytes:
 async def set_data(key: KeyType, request: Request) -> None:
     path = os.path.join(data_folder, key)
     is_new_file = not os.path.isfile(path)
-    with open(path, "wb+") as f:
+    async with aiofiles.open(path, "wb+") as f:
         bystr = await request.body()
-        logger.info(f"bystr: {bystr}")
-        f.write(bystr)
+        await f.write(bystr)
 
     git_commands.commit(
         file_path=key,
