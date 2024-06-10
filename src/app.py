@@ -34,7 +34,7 @@ app = FastAPI()
 
 
 @app.get("/{key}")
-async def get_data(key: KeyType) -> bytes:
+async def get_data(key: KeyType) -> Response:
     check_valid_path(key)
     async with aiofiles.open(os.path.join(data_folder, key), "rb") as f:
         data = await f.read()
