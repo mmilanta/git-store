@@ -28,7 +28,10 @@ async def push_loop():
         else:
             logger.info("skipping PUSH")
 
-asyncio.create_task(push_loop())
+
+if asyncio.get_event_loop().is_running():
+    asyncio.create_task(push_loop())
+
 
 app = FastAPI()
 
@@ -48,7 +51,6 @@ async def set_data(key: KeyType, request: Request) -> None:
     async with aiofiles.open(path, "wb+") as f:
         bystr = await request.body()
         await f.write(bystr)
-
     git_commands.commit(
         file_path=key,
         commit_message=("new" if is_new_file else "edit") + f": {key}",

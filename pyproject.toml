@@ -1,0 +1,11 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "git-store"
+version = "0.0.1"
+dependencies = ["fastapi", "GitPython", "pydantic", "uvicorn", "aiofiles"]
+
+[project.optional-dependencies]
+dev = ["mypy", "pre-commit", "pytest", "httpx"]

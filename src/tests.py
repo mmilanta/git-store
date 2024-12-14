@@ -8,23 +8,11 @@ from app import app, data_folder
 client = TestClient(app)
 
 
-@pytest.fixture(autouse=True)
-def setup_and_teardown():
-    # Setup: Create a test repo directory
-    if not os.path.exists(data_folder):
-        os.makedirs(data_folder)
-
-    yield
-
-    # Teardown: Remove the test repo directory
-    if os.path.exists(data_folder):
-        shutil.rmtree(data_folder)
-
 
 def test_list_data_empty():
     response = client.get("/")
     assert response.status_code == 200
-    assert response.json() == []
+    assert response.json() == [".git"]
 
 
 def test_set_and_get_data():
@@ -67,7 +55,7 @@ def test_list_data():
     # List data
     response = client.get("/")
     assert response.status_code == 200
-    assert set(response.json()) == set(keys_values.keys())
+    assert set(response.json()) == set(keys_values.keys()).union([".git"])
 
 
 def test_invalid_key():
