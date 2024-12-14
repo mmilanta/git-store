@@ -12,7 +12,7 @@ build:
 
 .PHONY: tests
 tests:
-	docker run -it --env-file ci.env -e SKIP_REMOTE_CONNECTION=true $(IMAGE) pytest tests.py -v -ss --log-cli-level=INFO
+	docker run --env-file ci.env -e SKIP_REMOTE_CONNECTION=true $(IMAGE) pytest tests.py -åv -ss --log-cli-level=INFO
 
 
 .PHONY: run-local
