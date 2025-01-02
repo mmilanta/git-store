@@ -1,6 +1,7 @@
 # Git Store
 A simple key-value store that persists everything on git, allowing to keep track of history.
-Disclaimer:
+> Disclaimer:
+> 1. This will be rather slow. It is suggested to use some caching to prevent useless requests
 ## Setup
 ### Add it to your app
 When using docker composer, you can pull the image from a public registry.
